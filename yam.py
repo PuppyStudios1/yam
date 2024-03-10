@@ -77,7 +77,7 @@ if __name__ == "__main__":    # <- main script
             get_repo_url()
             try:
                 clone_repo(repo_name)
-                print(Fore.LIGHTCYAN_EX+ ":. " + Fore.RESET Successfully cloned repository + "'"+repo_name+"'" ")
+                print(f"{Fore.LIGHTCYAN_EX}:. {Fore.RESET}Successfully cloned repository '{repo_name}'")
             except (ValueError, RuntimeError) as e:
                 print(f"{orange}error: A installation failure occurred: {e}")
     elif sys.argv[1] == "":

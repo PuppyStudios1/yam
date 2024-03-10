@@ -1,38 +1,37 @@
 # Target to generate the PKGBUILD
 generate-pkgbuild:
 
-    @echo "## PKGBUILD for yam-2.2" > PKGBUILD
-    @echo "" >> PKGBUILD
-    @echo "pkgname = yam" >> PKGBUILD
-    @echo "pkgver = 2.2" >> PKGBUILD
-    @echo "pkgrel = 1" >> PKGBUILD
-    @echo "pkgdesc = $(shell python3 -m pip show yam.py | grep Summary: | awk '{print $2}')" >> PKGBUILD
-    @echo "arch = (any)" >> PKGBUILD
-    @echo "url = https://github.com/PuppyStudios1/yam" >> PKGBUILD
-    @echo "license = $(shell python3 -m pip show yam.py | grep License: | awk '{print $2}')" >> PKGBUILD
-    @echo "makedepends = python" >> PKGBUILD  # Add additional dependencies here if needed
-    @echo "depends = $(shell python3 -m pip show yam.py | grep Requires: | awk '{print $2}')" >> PKGBUILD
-    @echo "" >> PKGBUILD
-    @echo "source = (yam-2.2.tar.gz)" >> PKGBUILD
-    @echo "" >> PKGBUILD
-    @echo "build() {" >> PKGBUILD
-    @echo "    # No build step needed for a Python script" >> PKGBUILD
-    @echo "}" >> PKGBUILD
-    @echo "" >> PKGBUILD
-    @echo "package() {" >> PKGBUILD
-    @echo "    install -m 755 yam.py \$pkgdir/usr/bin/" >> PKGBUILD
-    @echo "}" >> PKGBUILD
-    @echo "" >> PKGBUILD
-    @echo ".PHONY: clean" >> PKGBUILD
-    @echo "clean:" >> PKGBUILD
-    @echo "    rm -f PKGBUILD" >> PKGBUILD
+pkgname = yam
+pkgver = 2.2
+pkgrel = 1
 
-# Target to create a dummy source archive (optional)
-create-source-archive:
+# Get license information from project source (replace with actual command if needed)
+license = $(shell grep -i License yam.py | head -n 1 | awk '{print $2}')
 
-    @tar -czvf yam-2.2.tar.gz yam.py  # Include additional files if needed
+# Check for shebang line (adjust build step if needed)
+has_shebang = $(shell grep -q '^#!' yam.py; echo $$?)
 
-.PHONY: generate-pkgbuild create-source-archive
+# Define build step conditionally
+build() {
+  if [ "$has_shebang" -eq 0 ]; then
+    # Install as executable if shebang line exists
+    cp -v yam.py src/
+    makepkg -sri
+  fi
+}
+
+# Package installation step
+package() {
+  install -m 755 yam.py \$pkgdir/usr/bin/
+}
+
+# Define clean target
+.PHONY: clean
+clean:
+  rm -f PKGBUILD
 
 all: generate-pkgbuild
 
+# This target is not required for Python scripts installable via pip
+# create-source-archive:
+#   @tar -czvf yam-2.2.tar.gz yam.py
